@@ -1,4 +1,4 @@
-# Floating Gesture Calculator 🎯🖐️
+# KAI KANAK 🎯🖐️
 
 A completely unnecessary calculator controlled by hand gestures.
 
