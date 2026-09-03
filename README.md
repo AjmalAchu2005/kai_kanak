@@ -1,16 +1,75 @@
-# React + Vite
+# Floating Gesture Calculator 🎯🖐️
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A completely unnecessary calculator controlled by hand gestures.
 
-Currently, two official plugins are available:
+Instead of clicking buttons like a normal human, users move their hand to navigate through a floating mathematical world and close their fist to "catch" numbers and operators. Because apparently clicking a calculator is too easy.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## Basic Details
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Team Name: Trust Me Bro
 
-## Expanding the Oxlint configuration
+### Team Members
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+- Team Lead: Abhishek B - SBCE
+- Member 2: Ajmal S - SBCE
+
+---
+
+## Project Description
+
+Kai Kanak is a fun, gesture-controlled calculator that replaces traditional buttons with floating numbers and mathematical operators.
+
+Using a webcam, the system tracks the user's hand movements. Moving the hand navigates through the floating objects, while closing the hand allows the user to catch numbers and operators to build a mathematical expression.
+
+---
+
+## The Problem (that doesn't exist)
+
+Using a calculator requires the user to:
+
+1. Look at the calculator.
+2. Find the correct button.
+3. Move their finger.
+4. Click the button.
+
+This is clearly far too efficient.
+
+Our project solves the completely imaginary problem of:
+
+> **"What if using a calculator was unnecessarily difficult?"**
+
+---
+
+## The Solution (that nobody asked for)
+
+We removed the buttons.
+
+Numbers and operators float freely around the screen. The user controls the floating mathematical universe using their hand.
+
+### How it works:
+
+- 🖐️ Move your hand → Navigate through the floating world
+- ✊ Close your fist → Catch a number or operator
+- ➕ Catch operators → Build an expression
+- 🧮 Catch `=` → Calculate the result
+- 🔄 Reset → Start another completely unnecessary calculation
+
+Example:
+
+```text
+          7
+
+                  +
+
+      3
+
+                         ×
+
+             8
+
+                   =
+
+Expression: 7 + 3
+Result: 10
