@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import "./App.css";
 import Camera from "./components/Camera";
+import StartPage from "./components/StartPage";
 
 // ==================================================
 // CONSTANTS
@@ -51,7 +52,9 @@ function calculateExpression(expression) {
     return null;
   }
 
-  const tokens = normalized.match(/(\d*\.?\d+|[+\-*/])/g);
+  const tokens = normalized.match(
+    /(\d*\.?\d+|[+\-*/])/g
+  );
 
   if (!tokens || tokens.length === 0) {
     return null;
@@ -84,9 +87,9 @@ function calculateExpression(expression) {
     return null;
   }
 
-  // ----------------------------------------------
-  // Multiplication / Division
-  // ----------------------------------------------
+  // ==================================================
+  // MULTIPLICATION / DIVISION
+  // ==================================================
 
   const reducedNumbers = [numbers[0]];
   const reducedOperators = [];
@@ -97,35 +100,48 @@ function calculateExpression(expression) {
 
     if (operator === "*") {
       const previous = reducedNumbers.pop();
-      reducedNumbers.push(previous * nextNumber);
+      reducedNumbers.push(
+        previous * nextNumber
+      );
     } else if (operator === "/") {
       if (nextNumber === 0) {
         return null;
       }
 
       const previous = reducedNumbers.pop();
-      reducedNumbers.push(previous / nextNumber);
+
+      reducedNumbers.push(
+        previous / nextNumber
+      );
     } else {
       reducedOperators.push(operator);
       reducedNumbers.push(nextNumber);
     }
   }
 
-  // ----------------------------------------------
-  // Addition / Subtraction
-  // ----------------------------------------------
+  // ==================================================
+  // ADDITION / SUBTRACTION
+  // ==================================================
 
   let result = reducedNumbers[0];
 
-  for (let i = 0; i < reducedOperators.length; i++) {
+  for (
+    let i = 0;
+    i < reducedOperators.length;
+    i++
+  ) {
     if (reducedOperators[i] === "+") {
       result += reducedNumbers[i + 1];
-    } else if (reducedOperators[i] === "-") {
+    } else if (
+      reducedOperators[i] === "-"
+    ) {
       result -= reducedNumbers[i + 1];
     }
   }
 
-  return Number.isFinite(result) ? result : null;
+  return Number.isFinite(result)
+    ? result
+    : null;
 }
 
 // ==================================================
@@ -133,263 +149,188 @@ function calculateExpression(expression) {
 // ==================================================
 
 function App() {
-  // ------------------------------------------------
+  // ==================================================
+  // START PAGE
+  // ==================================================
+
+  const [started, setStarted] =
+    useState(false);
+
+  // ==================================================
   // REFS
-  // ------------------------------------------------
+  // ==================================================
 
   const worldRef = useRef(null);
 
-  const bubblePositionsRef = useRef([]);
-  const caughtIdsRef = useRef(new Set());
+  const bubblePositionsRef =
+    useRef([]);
 
-  const previousGestureRef = useRef("NONE");
-  const animationFrameRef = useRef(null);
+  const caughtIdsRef =
+    useRef(new Set());
 
-  // ------------------------------------------------
+  const previousGestureRef =
+    useRef("NONE");
+
+  const animationFrameRef =
+    useRef(null);
+
+  // ==================================================
   // STATE
-  // ------------------------------------------------
-
-  const [handPosition, setHandPosition] = useState(null);
-  const [handDetected, setHandDetected] = useState(false);
-  const [gesture, setGesture] = useState("NONE");
-
-  const [bubblePositions, setBubblePositions] = useState([]);
-
-  const [expression, setExpression] = useState("");
-  const [result, setResult] = useState(null);
-
-  const [caughtIds, setCaughtIds] = useState(new Set());
-
-  // ==================================================
-  // BUBBLE INITIALIZATION
   // ==================================================
 
-  const initializeBubbles = useCallback(() => {
-    const world = worldRef.current;
+  const [handPosition, setHandPosition] =
+    useState(null);
 
-    if (!world) return;
+  const [handDetected, setHandDetected] =
+    useState(false);
 
-    const width = world.clientWidth;
-    const height = world.clientHeight;
+  const [gesture, setGesture] =
+    useState("NONE");
 
-    const MIN_X = BUBBLE_RADIUS + WALL_PADDING;
-    const MAX_X = width - BUBBLE_RADIUS - WALL_PADDING;
+  const [bubblePositions, setBubblePositions] =
+    useState([]);
 
-    const MIN_Y = BUBBLE_RADIUS + WALL_PADDING;
-    const MAX_Y = height - BUBBLE_RADIUS - WALL_PADDING;
+  const [expression, setExpression] =
+    useState("");
 
-    const bubbles = INITIAL_OBJECTS.map((object, index) => {
-      const x = Math.max(
-        MIN_X,
-        Math.min(MAX_X, (object.x / 100) * width)
-      );
+  const [result, setResult] =
+    useState(null);
 
-      const y = Math.max(
-        MIN_Y,
-        Math.min(MAX_Y, (object.y / 100) * height)
-      );
-
-      // Different direction for each bubble.
-      const angle =
-        ((index * 47) % 360) * (Math.PI / 180);
-
-      // Moderate speed.
-      const speed = 1.3 + (index % 3) * 0.35;
-
-      return {
-        ...object,
-        x,
-        y,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed,
-      };
-    });
-
-    bubblePositionsRef.current = bubbles;
-    setBubblePositions(bubbles);
-  }, []);
+  const [caughtIds, setCaughtIds] =
+    useState(new Set());
 
   // ==================================================
-  // HAND TRACKING
+  // INITIALIZE BUBBLES
   // ==================================================
 
-  const handleHandUpdate = useCallback((position) => {
-    if (!position) {
-      setHandPosition(null);
-      setHandDetected(false);
-      return;
-    }
-
-    setHandPosition(position);
-    setHandDetected(true);
-
-    // Hand movement does NOT affect bubbles.
-  }, []);
-
-  // ==================================================
-  // CATCH BUBBLE WITH FIST
-  // ==================================================
-
-  const catchBubble = useCallback(() => {
-    if (!handPosition || !worldRef.current) {
-      return;
-    }
-
-    const world = worldRef.current;
-
-    const width = world.clientWidth;
-    const height = world.clientHeight;
-
-    // Inverted cursor.
-    const cursorX = handPosition.x * width;
-    const cursorY = (1 - handPosition.y) * height;
-
-    const catchRadius = 55;
-
-    let closestBubble = null;
-    let closestDistance = Infinity;
-
-    for (const bubble of bubblePositionsRef.current) {
-      if (caughtIdsRef.current.has(bubble.id)) {
-        continue;
-      }
-
-      const dx = bubble.x - cursorX;
-      const dy = bubble.y - cursorY;
-
-      const distance = Math.sqrt(
-        dx * dx + dy * dy
-      );
-
-      if (
-        distance <= catchRadius &&
-        distance < closestDistance
-      ) {
-        closestBubble = bubble;
-        closestDistance = distance;
-      }
-    }
-
-    if (!closestBubble) {
-      return;
-    }
-
-    caughtIdsRef.current.add(closestBubble.id);
-
-    setCaughtIds(new Set(caughtIdsRef.current));
-
-    // ----------------------------------------------
-    // Equals
-    // ----------------------------------------------
-
-    if (closestBubble.type === "equals") {
-      const calculated =
-        calculateExpression(expression);
-
-      if (calculated === null) {
-        setResult("ERROR");
-      } else {
-        setResult(calculated);
-      }
-
-      return;
-    }
-
-    // ----------------------------------------------
-    // Number / Operator
-    // ----------------------------------------------
-
-    setExpression(
-      (previous) =>
-        previous + closestBubble.value
-    );
-
-    setResult(null);
-  }, [handPosition, expression]);
-
-  // ==================================================
-  // GESTURE UPDATE
-  // ==================================================
-
-  const handleGestureUpdate = useCallback(
-    (newGesture) => {
-      setGesture(newGesture);
-
-      // Catch only when fist starts.
-      if (
-        newGesture === "FIST" &&
-        previousGestureRef.current !== "FIST"
-      ) {
-        catchBubble();
-      }
-
-      previousGestureRef.current = newGesture;
-    },
-    [catchBubble]
-  );
-
-  // ==================================================
-  // BUBBLE PHYSICS
-  // ==================================================
-
-  useEffect(() => {
-    let lastTime = performance.now();
-
-    const updatePhysics = (currentTime) => {
+  const initializeBubbles =
+    useCallback(() => {
       const world = worldRef.current;
 
-      if (!world) {
-        animationFrameRef.current =
-          requestAnimationFrame(updatePhysics);
+      if (!world) return;
 
-        return;
-      }
-
-      // IMPORTANT:
-      // We now measure the actual .world element.
       const width = world.clientWidth;
       const height = world.clientHeight;
-
-      // ----------------------------------------------
-      // STRICT BOUNDARY
-      // ----------------------------------------------
 
       const MIN_X =
         BUBBLE_RADIUS + WALL_PADDING;
 
       const MAX_X =
-        width - BUBBLE_RADIUS - WALL_PADDING;
+        width -
+        BUBBLE_RADIUS -
+        WALL_PADDING;
 
       const MIN_Y =
         BUBBLE_RADIUS + WALL_PADDING;
 
       const MAX_Y =
-        height - BUBBLE_RADIUS - WALL_PADDING;
+        height -
+        BUBBLE_RADIUS -
+        WALL_PADDING;
 
-      // ----------------------------------------------
-      // Frame timing
-      // ----------------------------------------------
-
-      const deltaTime = Math.min(
-        (currentTime - lastTime) / 16.67,
-        2
-      );
-
-      lastTime = currentTime;
-
-      // Copy current bubbles.
       const bubbles =
-        bubblePositionsRef.current.map(
-          (bubble) => ({
-            ...bubble,
-          })
+        INITIAL_OBJECTS.map(
+          (object, index) => {
+            const x = Math.max(
+              MIN_X,
+              Math.min(
+                MAX_X,
+                (object.x / 100) * width
+              )
+            );
+
+            const y = Math.max(
+              MIN_Y,
+              Math.min(
+                MAX_Y,
+                (object.y / 100) * height
+              )
+            );
+
+            const angle =
+              ((index * 47) % 360) *
+              (Math.PI / 180);
+
+            const speed =
+              1.3 +
+              (index % 3) * 0.35;
+
+            return {
+              ...object,
+              x,
+              y,
+              vx:
+                Math.cos(angle) *
+                speed,
+              vy:
+                Math.sin(angle) *
+                speed,
+            };
+          }
         );
 
-      // ==================================================
-      // MOVE BUBBLES
-      // ==================================================
+      bubblePositionsRef.current =
+        bubbles;
 
-      for (const bubble of bubbles) {
+      setBubblePositions(bubbles);
+    }, []);
+
+  // ==================================================
+  // HAND TRACKING
+  // ==================================================
+
+  const handleHandUpdate =
+    useCallback((position) => {
+      if (!position) {
+        setHandPosition(null);
+        setHandDetected(false);
+        return;
+      }
+
+      setHandPosition(position);
+      setHandDetected(true);
+    }, []);
+
+  // ==================================================
+  // CATCH BUBBLE
+  // ==================================================
+
+  const catchBubble =
+    useCallback(() => {
+      if (
+        !handPosition ||
+        !worldRef.current
+      ) {
+        return;
+      }
+
+      const world =
+        worldRef.current;
+
+      const width =
+        world.clientWidth;
+
+      const height =
+        world.clientHeight;
+
+      // Inverted cursor
+      const cursorX =
+        handPosition.x * width;
+
+      const cursorY =
+        (1 - handPosition.y) *
+        height;
+
+      const catchRadius = 55;
+
+      let closestBubble = null;
+      let closestDistance =
+        Infinity;
+
+      for (
+        const bubble of
+        bubblePositionsRef.current
+      ) {
         if (
           caughtIdsRef.current.has(
             bubble.id
@@ -398,237 +339,477 @@ function App() {
           continue;
         }
 
-        bubble.x +=
-          bubble.vx * deltaTime;
+        const dx =
+          bubble.x - cursorX;
 
-        bubble.y +=
-          bubble.vy * deltaTime;
+        const dy =
+          bubble.y - cursorY;
 
-        // ----------------------------------------------
-        // LEFT WALL
-        // ----------------------------------------------
+        const distance =
+          Math.sqrt(
+            dx * dx +
+            dy * dy
+          );
 
-        if (bubble.x < MIN_X) {
-          bubble.x = MIN_X;
-          bubble.vx =
-            Math.abs(bubble.vx);
-        }
+        if (
+          distance <= catchRadius &&
+          distance < closestDistance
+        ) {
+          closestBubble =
+            bubble;
 
-        // ----------------------------------------------
-        // RIGHT WALL
-        // ----------------------------------------------
-
-        if (bubble.x > MAX_X) {
-          bubble.x = MAX_X;
-          bubble.vx =
-            -Math.abs(bubble.vx);
-        }
-
-        // ----------------------------------------------
-        // TOP WALL
-        // ----------------------------------------------
-
-        if (bubble.y < MIN_Y) {
-          bubble.y = MIN_Y;
-          bubble.vy =
-            Math.abs(bubble.vy);
-        }
-
-        // ----------------------------------------------
-        // BOTTOM WALL
-        // ----------------------------------------------
-
-        if (bubble.y > MAX_Y) {
-          bubble.y = MAX_Y;
-          bubble.vy =
-            -Math.abs(bubble.vy);
+          closestDistance =
+            distance;
         }
       }
 
+      if (!closestBubble) {
+        return;
+      }
+
+      caughtIdsRef.current.add(
+        closestBubble.id
+      );
+
+      setCaughtIds(
+        new Set(caughtIdsRef.current)
+      );
+
       // ==================================================
-      // BUBBLE ↔ BUBBLE COLLISION
+      // EQUALS
       // ==================================================
 
-      for (let i = 0; i < bubbles.length; i++) {
-        for (
-          let j = i + 1;
-          j < bubbles.length;
-          j++
+      if (
+        closestBubble.type ===
+        "equals"
+      ) {
+        const calculated =
+          calculateExpression(
+            expression
+          );
+
+        // ==================================================
+        // ERROR
+        // ==================================================
+
+        if (calculated === null) {
+          const audio =
+            new Audio(
+              "/error-sound.mpeg"
+            );
+
+          audio.currentTime = 0;
+
+          audio
+            .play()
+            .catch(() => { });
+
+          setResult("ERROR");
+        }
+
+        // ==================================================
+        // CORRECT ANSWER
+        // ==================================================
+
+        else {
+          const audio =
+            new Audio(
+              "/answer-sound.mpeg"
+            );
+
+          audio.currentTime = 0;
+
+          audio
+            .play()
+            .catch(() => { });
+
+          setResult(calculated);
+        }
+
+        return;
+      }
+
+      // ==================================================
+      // NUMBER / OPERATOR
+      // ==================================================
+
+      setExpression(
+        (previous) =>
+          previous +
+          closestBubble.value
+      );
+
+      setResult(null);
+    }, [handPosition, expression]);
+
+  // ==================================================
+  // GESTURE UPDATE
+  // ==================================================
+
+  const handleGestureUpdate =
+    useCallback(
+      (newGesture) => {
+        setGesture(newGesture);
+
+        // Catch only when gesture changes
+        // INTO fist
+        if (
+          newGesture === "FIST" &&
+          previousGestureRef.current !==
+          "FIST"
         ) {
-          const a = bubbles[i];
-          const b = bubbles[j];
+          catchBubble();
+        }
 
+        previousGestureRef.current =
+          newGesture;
+      },
+      [catchBubble]
+    );
+
+  // ==================================================
+  // BUBBLE PHYSICS
+  // ==================================================
+
+  useEffect(() => {
+    let lastTime =
+      performance.now();
+
+    const updatePhysics =
+      (currentTime) => {
+        const world =
+          worldRef.current;
+
+        if (!world) {
+          animationFrameRef.current =
+            requestAnimationFrame(
+              updatePhysics
+            );
+
+          return;
+        }
+
+        const width =
+          world.clientWidth;
+
+        const height =
+          world.clientHeight;
+
+        const MIN_X =
+          BUBBLE_RADIUS +
+          WALL_PADDING;
+
+        const MAX_X =
+          width -
+          BUBBLE_RADIUS -
+          WALL_PADDING;
+
+        const MIN_Y =
+          BUBBLE_RADIUS +
+          WALL_PADDING;
+
+        const MAX_Y =
+          height -
+          BUBBLE_RADIUS -
+          WALL_PADDING;
+
+        const deltaTime =
+          Math.min(
+            (currentTime -
+              lastTime) /
+            16.67,
+            2
+          );
+
+        lastTime =
+          currentTime;
+
+        const bubbles =
+          bubblePositionsRef.current.map(
+            (bubble) => ({
+              ...bubble,
+            })
+          );
+
+        // ==================================================
+        // MOVE
+        // ==================================================
+
+        for (
+          const bubble of bubbles
+        ) {
           if (
-            caughtIdsRef.current.has(a.id) ||
-            caughtIdsRef.current.has(b.id)
+            caughtIdsRef.current.has(
+              bubble.id
+            )
           ) {
             continue;
           }
 
-          const dx = b.x - a.x;
-          const dy = b.y - a.y;
+          bubble.x +=
+            bubble.vx *
+            deltaTime;
 
-          const distance = Math.sqrt(
-            dx * dx + dy * dy
-          );
+          bubble.y +=
+            bubble.vy *
+            deltaTime;
 
-          const minimumDistance =
-            BUBBLE_RADIUS * 2;
+          // Left wall
+          if (bubble.x < MIN_X) {
+            bubble.x = MIN_X;
+            bubble.vx =
+              Math.abs(
+                bubble.vx
+              );
+          }
 
-          if (
-            distance > 0 &&
-            distance < minimumDistance
+          // Right wall
+          if (bubble.x > MAX_X) {
+            bubble.x = MAX_X;
+            bubble.vx =
+              -Math.abs(
+                bubble.vx
+              );
+          }
+
+          // Top wall
+          if (bubble.y < MIN_Y) {
+            bubble.y = MIN_Y;
+            bubble.vy =
+              Math.abs(
+                bubble.vy
+              );
+          }
+
+          // Bottom wall
+          if (bubble.y > MAX_Y) {
+            bubble.y = MAX_Y;
+            bubble.vy =
+              -Math.abs(
+                bubble.vy
+              );
+          }
+        }
+
+        // ==================================================
+        // BUBBLE COLLISIONS
+        // ==================================================
+
+        for (
+          let i = 0;
+          i < bubbles.length;
+          i++
+        ) {
+          for (
+            let j = i + 1;
+            j < bubbles.length;
+            j++
           ) {
-            // ------------------------------------------
-            // Collision normal
-            // ------------------------------------------
+            const a =
+              bubbles[i];
 
-            const nx = dx / distance;
-            const ny = dy / distance;
+            const b =
+              bubbles[j];
 
-            // ------------------------------------------
-            // Separate bubbles
-            // ------------------------------------------
-
-            const overlap =
-              minimumDistance - distance;
-
-            a.x -=
-              nx * (overlap / 2);
-
-            a.y -=
-              ny * (overlap / 2);
-
-            b.x +=
-              nx * (overlap / 2);
-
-            b.y +=
-              ny * (overlap / 2);
-
-            // ------------------------------------------
-            // Relative velocity
-            // ------------------------------------------
-
-            const relativeVelocityX =
-              b.vx - a.vx;
-
-            const relativeVelocityY =
-              b.vy - a.vy;
-
-            const velocityAlongNormal =
-              relativeVelocityX * nx +
-              relativeVelocityY * ny;
-
-            // Already moving apart.
             if (
-              velocityAlongNormal > 0
+              caughtIdsRef.current.has(
+                a.id
+              ) ||
+              caughtIdsRef.current.has(
+                b.id
+              )
             ) {
               continue;
             }
 
-            // ------------------------------------------
-            // Elastic collision
-            // ------------------------------------------
+            const dx =
+              b.x - a.x;
 
-            const impulse =
-              -velocityAlongNormal;
+            const dy =
+              b.y - a.y;
 
-            a.vx -=
-              impulse * nx;
+            const distance =
+              Math.sqrt(
+                dx * dx +
+                dy * dy
+              );
 
-            a.vy -=
-              impulse * ny;
+            const minimumDistance =
+              BUBBLE_RADIUS * 2;
 
-            b.vx +=
-              impulse * nx;
+            if (
+              distance > 0 &&
+              distance <
+              minimumDistance
+            ) {
+              const nx =
+                dx / distance;
 
-            b.vy +=
-              impulse * ny;
+              const ny =
+                dy / distance;
+
+              const overlap =
+                minimumDistance -
+                distance;
+
+              // Separate bubbles
+              a.x -=
+                nx *
+                (overlap / 2);
+
+              a.y -=
+                ny *
+                (overlap / 2);
+
+              b.x +=
+                nx *
+                (overlap / 2);
+
+              b.y +=
+                ny *
+                (overlap / 2);
+
+              const relativeVelocityX =
+                b.vx - a.vx;
+
+              const relativeVelocityY =
+                b.vy - a.vy;
+
+              const velocityAlongNormal =
+                relativeVelocityX *
+                nx +
+                relativeVelocityY *
+                ny;
+
+              if (
+                velocityAlongNormal >
+                0
+              ) {
+                continue;
+              }
+
+              const impulse =
+                -velocityAlongNormal;
+
+              a.vx -=
+                impulse * nx;
+
+              a.vy -=
+                impulse * ny;
+
+              b.vx +=
+                impulse * nx;
+
+              b.vy +=
+                impulse * ny;
+            }
           }
         }
-      }
 
-      // ==================================================
-      // FINAL STRICT BOUNDARY CLAMP
-      // ==================================================
+        // ==================================================
+        // FINAL WALL CLAMP
+        // ==================================================
 
-      for (const bubble of bubbles) {
-        if (bubble.x < MIN_X) {
-          bubble.x = MIN_X;
-          bubble.vx =
-            Math.abs(bubble.vx);
-        }
-
-        if (bubble.x > MAX_X) {
-          bubble.x = MAX_X;
-          bubble.vx =
-            -Math.abs(bubble.vx);
-        }
-
-        if (bubble.y < MIN_Y) {
-          bubble.y = MIN_Y;
-          bubble.vy =
-            Math.abs(bubble.vy);
-        }
-
-        if (bubble.y > MAX_Y) {
-          bubble.y = MAX_Y;
-          bubble.vy =
-            -Math.abs(bubble.vy);
-        }
-      }
-
-      // ==================================================
-      // KEEP SPEED MODERATE
-      // ==================================================
-
-      for (const bubble of bubbles) {
-        const speed = Math.sqrt(
-          bubble.vx * bubble.vx +
-          bubble.vy * bubble.vy
-        );
-
-        const maxSpeed = 3.5;
-        const minSpeed = 0.8;
-
-        if (speed > maxSpeed) {
-          bubble.vx =
-            (bubble.vx / speed) *
-            maxSpeed;
-
-          bubble.vy =
-            (bubble.vy / speed) *
-            maxSpeed;
-        }
-
-        if (
-          speed < minSpeed &&
-          speed > 0
+        for (
+          const bubble of bubbles
         ) {
-          bubble.vx =
-            (bubble.vx / speed) *
-            minSpeed;
+          if (bubble.x < MIN_X) {
+            bubble.x = MIN_X;
+            bubble.vx =
+              Math.abs(
+                bubble.vx
+              );
+          }
 
-          bubble.vy =
-            (bubble.vy / speed) *
-            minSpeed;
+          if (bubble.x > MAX_X) {
+            bubble.x = MAX_X;
+            bubble.vx =
+              -Math.abs(
+                bubble.vx
+              );
+          }
+
+          if (bubble.y < MIN_Y) {
+            bubble.y = MIN_Y;
+            bubble.vy =
+              Math.abs(
+                bubble.vy
+              );
+          }
+
+          if (bubble.y > MAX_Y) {
+            bubble.y = MAX_Y;
+            bubble.vy =
+              -Math.abs(
+                bubble.vy
+              );
+          }
         }
-      }
 
-      // ==================================================
-      // SAVE FRAME
-      // ==================================================
+        // ==================================================
+        // SPEED LIMIT
+        // ==================================================
 
-      bubblePositionsRef.current =
-        bubbles;
+        for (
+          const bubble of bubbles
+        ) {
+          const speed =
+            Math.sqrt(
+              bubble.vx *
+              bubble.vx +
+              bubble.vy *
+              bubble.vy
+            );
 
-      setBubblePositions(bubbles);
+          const maxSpeed = 3.5;
+          const minSpeed = 0.8;
 
-      animationFrameRef.current =
-        requestAnimationFrame(
-          updatePhysics
+          if (
+            speed > maxSpeed
+          ) {
+            bubble.vx =
+              (bubble.vx /
+                speed) *
+              maxSpeed;
+
+            bubble.vy =
+              (bubble.vy /
+                speed) *
+              maxSpeed;
+          }
+
+          if (
+            speed < minSpeed &&
+            speed > 0
+          ) {
+            bubble.vx =
+              (bubble.vx /
+                speed) *
+              minSpeed;
+
+            bubble.vy =
+              (bubble.vy /
+                speed) *
+              minSpeed;
+          }
+        }
+
+        // ==================================================
+        // SAVE FRAME
+        // ==================================================
+
+        bubblePositionsRef.current =
+          bubbles;
+
+        setBubblePositions(
+          bubbles
         );
-    };
+
+        animationFrameRef.current =
+          requestAnimationFrame(
+            updatePhysics
+          );
+      };
 
     animationFrameRef.current =
       requestAnimationFrame(
@@ -636,7 +817,9 @@ function App() {
       );
 
     return () => {
-      if (animationFrameRef.current) {
+      if (
+        animationFrameRef.current
+      ) {
         cancelAnimationFrame(
           animationFrameRef.current
         );
@@ -645,229 +828,253 @@ function App() {
   }, []);
 
   // ==================================================
-  // INITIALIZE
+  // INITIALIZE AFTER START
   // ==================================================
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      initializeBubbles();
-    }, 100);
+    if (!started) return;
 
-    return () => clearTimeout(timer);
-  }, [initializeBubbles]);
+    const timer =
+      setTimeout(() => {
+        initializeBubbles();
+      }, 100);
+
+    return () =>
+      clearTimeout(timer);
+  }, [
+    started,
+    initializeBubbles,
+  ]);
 
   // ==================================================
   // RESET
   // ==================================================
 
-  const handleReset = useCallback(() => {
-    setExpression("");
-    setResult(null);
+  const handleReset =
+    useCallback(() => {
+      setExpression("");
+      setResult(null);
 
-    caughtIdsRef.current.clear();
+      caughtIdsRef.current.clear();
 
-    setCaughtIds(new Set());
+      setCaughtIds(
+        new Set()
+      );
 
-    previousGestureRef.current =
-      "NONE";
+      previousGestureRef.current =
+        "NONE";
 
-    initializeBubbles();
-  }, [initializeBubbles]);
+      initializeBubbles();
+    }, [initializeBubbles]);
 
   // ==================================================
   // CURSOR
   // ==================================================
 
-  const cursorStyle = handPosition
-    ? {
-      left:
-        `${handPosition.x * 100}%`,
-      top:
-        `${(1 - handPosition.y) * 100}%`,
-    }
-    : {
-      left: "-100px",
-      top: "-100px",
-    };
+  const cursorStyle =
+    handPosition
+      ? {
+        left:
+          `${handPosition.x * 100}%`,
+        top:
+          `${(1 -
+            handPosition.y) *
+          100}%`,
+      }
+      : {
+        left: "-100px",
+        top: "-100px",
+      };
 
   // ==================================================
   // RENDER
   // ==================================================
 
   return (
-    <main className="app">
-
-      {/* ==============================================
-          HEADER
-      ============================================== */}
-
-      <header className="header">
-
-        <div className="eyebrow">
-          GESTURE CONTROLLED
-        </div>
-
-        <h1>
-          FLOATING CALCULATOR
-        </h1>
-
-        <div className="status">
-
-          <div>
-            {handDetected
-              ? "SYSTEM READY"
-              : "SEARCHING FOR HAND"}
-          </div>
-
-          <div>
-            {expression ||
-              "EXPRESSION"}
-          </div>
-
-          <div>
-            {result !== null
-              ? `= ${result}`
-              : "Move your hand to begin"}
-          </div>
-
-        </div>
-
-      </header>
-
-      {/* ==============================================
-          PLAYGROUND
-      ============================================== */}
-
-      <section className="playground">
-
-        {/* IMPORTANT:
-            worldRef is attached to .world.
-            This is the actual bubble boundary.
-        */}
-
-        <div
-          ref={worldRef}
-          className="world"
-        >
+    <>
+      {!started ? (
+        <StartPage
+          onStart={() =>
+            setStarted(true)
+          }
+        />
+      ) : (
+        <main className="app">
 
           {/* ==========================================
-              BUBBLES
+              HEADER
           ========================================== */}
 
-          {bubblePositions.map(
-            (bubble) => {
+          <header className="header">
 
-              const isCaught =
-                caughtIds.has(
-                  bubble.id
-                );
+            <div className="eyebrow">
+              GESTURE CONTROLLED
+            </div>
 
-              return (
-                <div
-                  key={bubble.id}
-                  className={`floating-object ${bubble.type}`}
-                  style={{
-                    left:
-                      `${bubble.x}px`,
-                    top:
-                      `${bubble.y}px`,
-                    opacity:
-                      isCaught
-                        ? 0
-                        : 1,
-                    pointerEvents:
-                      "none",
-                  }}
-                >
-                  {bubble.value}
+            <h1>
+              FLOATING CALCULATOR
+            </h1>
+
+            <div className="status">
+
+              <div>
+                {handDetected
+                  ? "SYSTEM READY"
+                  : "SEARCHING FOR HAND"}
+              </div>
+
+              <div>
+                {expression ||
+                  "EXPRESSION"}
+              </div>
+
+              <div>
+                {result !== null
+                  ? `= ${result}`
+                  : "Move your hand to begin"}
+              </div>
+
+            </div>
+
+          </header>
+
+          {/* ==========================================
+              PLAYGROUND
+          ========================================== */}
+
+          <section className="playground">
+
+            <div
+              ref={worldRef}
+              className="world"
+            >
+
+              {/* ========================================
+                  BUBBLES
+              ======================================== */}
+
+              {bubblePositions.map(
+                (bubble) => {
+
+                  const isCaught =
+                    caughtIds.has(
+                      bubble.id
+                    );
+
+                  return (
+                    <div
+                      key={bubble.id}
+                      className={`floating-object ${bubble.type}`}
+                      style={{
+                        left:
+                          `${bubble.x}px`,
+                        top:
+                          `${bubble.y}px`,
+                        opacity:
+                          isCaught
+                            ? 0
+                            : 1,
+                        pointerEvents:
+                          "none",
+                      }}
+                    >
+                      {bubble.value}
+                    </div>
+                  );
+                }
+              )}
+
+              {/* ========================================
+                  GESTURE CURSOR
+              ======================================== */}
+
+              <div
+                className="gesture-cursor"
+                style={
+                  cursorStyle
+                }
+              >
+
+                <div className="cursor-ring">
+                  {gesture ===
+                    "FIST"
+                    ? "✊"
+                    : "☝"}
                 </div>
-              );
-            }
-          )}
 
-          {/* ==========================================
-              GESTURE CURSOR
-          ========================================== */}
+                <div className="cursor-label">
+                  {gesture ===
+                    "FIST"
+                    ? "CATCH"
+                    : "MOVE"}
+                </div>
 
-          <div
-            className="gesture-cursor"
-            style={cursorStyle}
-          >
+              </div>
 
-            <div className="cursor-ring">
-              {gesture === "FIST"
-                ? "✊"
-                : "☝"}
             </div>
 
-            <div className="cursor-label">
-              {gesture === "FIST"
-                ? "CATCH"
-                : "MOVE"}
+            {/* ========================================
+                CAMERA
+            ======================================== */}
+
+            <div className="camera-preview">
+
+              <Camera
+                onHandUpdate={
+                  handleHandUpdate
+                }
+                onGestureUpdate={
+                  handleGestureUpdate
+                }
+              />
+
             </div>
 
-          </div>
+            {/* ========================================
+                CONTROLS
+            ======================================== */}
 
-        </div>
+            <div className="controls">
 
-        {/* ============================================
-            CAMERA
-        ============================================ */}
+              <div className="controls-title">
+                ◈ GESTURE CONTROLS
+              </div>
 
-        <div className="camera-preview">
+              <div>
+                ✋ Move hand
+              </div>
 
-          <Camera
-            onHandUpdate={
-              handleHandUpdate
-            }
-            onGestureUpdate={
-              handleGestureUpdate
-            }
-          />
+              <div>
+                ☝ Touch bubbles
+              </div>
 
-        </div>
+              <div>
+                ✊ Close fist Catch object
+              </div>
 
-        {/* ============================================
-            CONTROLS
-        ============================================ */}
+              <div>
+                🫧 Bubble collision
+              </div>
 
-        <div className="controls">
+              <div>
+                ESC CLEAR EXPRESSION
+              </div>
 
-          <div className="controls-title">
-            ◈ GESTURE CONTROLS
-          </div>
+              <button
+                onClick={
+                  handleReset
+                }
+              >
+                RESET
+              </button>
 
-          <div>
-            ✋ Move hand
-          </div>
+            </div>
 
-          <div>
-            ☝ Touch bubbles
-          </div>
+          </section>
 
-          <div>
-            ✊ Close fist Catch object
-          </div>
-
-          <div>
-            🫧 Bubble collision
-          </div>
-
-          <div>
-            ESC CLEAR EXPRESSION
-          </div>
-
-          <button
-            onClick={handleReset}
-          >
-            RESET
-          </button>
-
-        </div>
-
-      </section>
-
-    </main>
+        </main>
+      )}
+    </>
   );
 }
 

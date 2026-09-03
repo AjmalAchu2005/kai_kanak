@@ -1,3 +1,7 @@
+/* ==================================================
+   FLOATING CALCULATOR
+================================================== */
+
 .counter {
   font-size: 16px;
   padding: 5px 10px;
@@ -169,7 +173,7 @@
 
   &::before,
   &::after {
-    content: '';
+    content: "";
     position: absolute;
     top: -4.5px;
     border: 5px solid transparent;
@@ -185,6 +189,10 @@
     border-right-color: var(--border);
   }
 }
+
+/* ==================================================
+   CAMERA STATUS
+================================================== */
 
 .tracking-status {
   position: absolute;
@@ -205,6 +213,10 @@
   pointer-events: none;
 }
 
+/* ==================================================
+   HAND POINT
+================================================== */
+
 .hand-point {
   position: absolute;
 
@@ -223,7 +235,9 @@
   pointer-events: none;
 }
 
-/* FLOATING CALCULATOR OBJECTS */
+/* ==================================================
+   FLOATING CALCULATOR OBJECTS
+================================================== */
 
 .floating-object {
   position: absolute;
@@ -267,40 +281,23 @@
   font-size: 34px;
 }
 
-
-/* CAMERA POSITION */
+/* ==================================================
+   PLAYGROUND
+================================================== */
 
 .playground {
   position: relative;
+  height: 70vh;
+  min-height: 500px;
 }
 
-.camera-preview {
-  position: absolute;
-  right: 20px;
-  bottom: 20px;
-  width: 180px;
-  height: 135px;
-  z-index: 20;
-  overflow: hidden;
-  border-radius: 10px;
-}
-
-.camera-screen {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-}
-
-.camera-video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  transform: scaleX(-1);
-}
+/* ==================================================
+   WORLD
+================================================== */
 
 .world {
   position: relative;
+
   width: 100%;
   height: 100%;
   min-height: 500px;
@@ -312,7 +309,46 @@
   border-radius: 12px;
 }
 
-/* HAND GESTURE POINTER */
+/* ==================================================
+   CAMERA
+================================================== */
+
+.camera-preview {
+  position: absolute;
+
+  right: 20px;
+  bottom: 20px;
+
+  width: 180px;
+  height: 135px;
+
+  z-index: 20;
+
+  overflow: hidden;
+
+  border-radius: 10px;
+}
+
+.camera-screen {
+  position: absolute;
+
+  width: 100%;
+  height: 100%;
+}
+
+.camera-video {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+  display: block;
+
+  transform: scaleX(-1);
+}
+
+/* ==================================================
+   HAND GESTURE CURSOR
+================================================== */
 
 .gesture-cursor {
   position: absolute;
@@ -363,4 +399,653 @@
   color: white;
 
   white-space: nowrap;
+}
+
+/* ==================================================
+   KAI KANNAK - START PAGE
+================================================== */
+
+.start-page {
+  position: relative;
+
+  width: 100%;
+  min-height: 100vh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+
+  /* CLASSROOM BACKGROUND */
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.38),
+      rgba(0, 0, 0, 0.38)),
+    url("/classroom-bg.png");
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* ==================================================
+   BACKGROUND GLOWS
+================================================== */
+
+.start-glow {
+  position: absolute;
+
+  border-radius: 50%;
+
+  pointer-events: none;
+
+  filter: blur(2px);
+}
+
+.start-glow-one {
+  width: 420px;
+  height: 420px;
+
+  border: 1px solid rgba(100, 150, 255, 0.18);
+
+  box-shadow:
+    0 0 80px rgba(80, 120, 255, 0.12),
+    inset 0 0 80px rgba(80, 120, 255, 0.08);
+
+  animation: start-glow-one 6s ease-in-out infinite;
+}
+
+.start-glow-two {
+  width: 700px;
+  height: 700px;
+
+  border: 1px solid rgba(255, 255, 255, 0.05);
+
+  animation: start-glow-two 10s ease-in-out infinite;
+}
+
+/* ==================================================
+   START PAGE CONTENT
+================================================== */
+
+.start-content {
+  position: relative;
+
+  z-index: 5;
+
+  width: min(700px, 90%);
+
+  text-align: center;
+
+  padding: 50px 30px;
+}
+
+/* ==================================================
+   START ICON
+================================================== */
+
+.start-icon {
+  width: 72px;
+  height: 72px;
+
+  margin: 0 auto 24px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+
+  background: rgba(0, 0, 0, 0.25);
+
+  font-size: 32px;
+
+  box-shadow:
+    0 0 20px rgba(100, 150, 255, 0.25);
+
+  animation: hand-float 3s ease-in-out infinite;
+}
+
+/* ==================================================
+   START EYEBROW
+================================================== */
+
+.start-eyebrow {
+  margin-bottom: 18px;
+
+  font-size: 11px;
+  font-weight: 800;
+
+  letter-spacing: 5px;
+
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* ==================================================
+   MAIN TITLE
+================================================== */
+
+.start-content h1 {
+  margin: 0;
+
+  font-size: clamp(55px, 10vw, 105px);
+
+  line-height: 0.95;
+
+  font-weight: 900;
+
+  letter-spacing: 8px;
+
+  color: white;
+
+  text-shadow:
+    0 0 15px rgba(100, 150, 255, 0.8),
+    0 0 40px rgba(100, 150, 255, 0.4),
+    0 0 80px rgba(100, 150, 255, 0.2);
+}
+
+.start-content h1 span {
+  display: inline-block;
+}
+
+/* ==================================================
+   START TITLE
+================================================== */
+
+.start-title {
+  margin: 22px 0 14px;
+
+  font-size: 15px;
+  font-weight: 800;
+
+  letter-spacing: 4px;
+
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* ==================================================
+   START DESCRIPTION
+================================================== */
+
+.start-description {
+  max-width: 560px;
+
+  margin: 0 auto;
+
+  font-size: 14px;
+
+  line-height: 1.8;
+
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* ==================================================
+   START BUTTON
+================================================== */
+
+.start-button {
+  margin-top: 38px;
+
+  min-width: 190px;
+
+  padding: 17px 38px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 12px;
+
+  border: 2px solid rgba(255, 255, 255, 0.75);
+  border-radius: 999px;
+
+  background: rgba(0, 0, 0, 0.3);
+
+  color: white;
+
+  font-size: 15px;
+  font-weight: 900;
+
+  letter-spacing: 4px;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 0 20px rgba(100, 150, 255, 0.3),
+    inset 0 0 20px rgba(255, 255, 255, 0.04);
+
+  transition:
+    transform 0.25s ease,
+    background 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.start-button-icon {
+  font-size: 12px;
+}
+
+.start-button:hover {
+  transform: translateY(-3px) scale(1.04);
+
+  background: rgba(255, 255, 255, 0.14);
+
+  box-shadow:
+    0 0 25px rgba(100, 150, 255, 0.65),
+    0 0 60px rgba(100, 150, 255, 0.2);
+}
+
+.start-button:active {
+  transform: scale(0.97);
+}
+
+/* ==================================================
+   START INSTRUCTIONS
+================================================== */
+
+.start-instructions {
+  margin-top: 42px;
+
+  display: flex;
+
+  justify-content: center;
+
+  gap: 45px;
+}
+
+.start-instructions div {
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  gap: 8px;
+
+  font-size: 9px;
+
+  font-weight: 800;
+
+  letter-spacing: 2px;
+
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.start-instructions span {
+  font-size: 22px;
+
+  filter:
+    drop-shadow(0 0 8px rgba(100, 150, 255, 0.5));
+}
+
+/* ==================================================
+   START FOOTER
+================================================== */
+
+.start-footer {
+  margin-top: 42px;
+
+  font-size: 9px;
+
+  letter-spacing: 4px;
+
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* ==================================================
+   START PAGE ANIMATIONS
+================================================== */
+
+@keyframes hand-float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes start-glow-one {
+
+  0%,
+  100% {
+    transform: scale(0.95);
+    opacity: 0.6;
+  }
+
+  50% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+}
+
+@keyframes start-glow-two {
+
+  0%,
+  100% {
+    transform: scale(0.95);
+    opacity: 0.4;
+  }
+
+  50% {
+    transform: scale(1.03);
+    opacity: 0.8;
+  }
+}
+
+/* ==================================================
+   MOBILE
+================================================== */
+
+@media (max-width: 600px) {
+  .start-content {
+    padding: 30px 20px;
+  }
+
+  .start-content h1 {
+    font-size: 52px;
+    letter-spacing: 4px;
+  }
+
+  .start-title {
+    font-size: 11px;
+    letter-spacing: 2px;
+  }
+
+  .start-description {
+    font-size: 13px;
+  }
+
+  .start-instructions {
+    gap: 25px;
+  }
+
+  .start-glow-one {
+    width: 300px;
+    height: 300px;
+  }
+
+  .start-glow-two {
+    width: 500px;
+    height: 500px;
+  }
+
+  .camera-preview {
+    width: 150px;
+    height: 112px;
+
+    right: 12px;
+    bottom: 12px;
+  }
+}
+/* ==================================================
+   KAI KANNAK START PAGE - FINAL
+================================================== */
+
+.start-page {
+  position: fixed;
+  inset: 0;
+
+  width: 100vw;
+  height: 100vh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.start-overlay {
+  position: relative;
+  z-index: 10;
+
+  width: min(700px, 90%);
+
+  padding: 45px 30px;
+
+  text-align: center;
+
+  color: white;
+}
+
+.start-icon {
+  width: 70px;
+  height: 70px;
+
+  margin: 0 auto 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  border-radius: 50%;
+
+  background: rgba(0, 0, 0, 0.3);
+
+  font-size: 30px;
+
+  box-shadow:
+    0 0 20px rgba(100, 150, 255, 0.5),
+    0 0 50px rgba(100, 150, 255, 0.2);
+
+  animation: kai-hand-float 3s ease-in-out infinite;
+}
+
+.start-eyebrow {
+  margin-bottom: 15px;
+
+  font-size: 11px;
+  font-weight: 800;
+
+  letter-spacing: 5px;
+
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.start-overlay h1 {
+  margin: 0;
+
+  font-size: clamp(55px, 9vw, 100px);
+
+  line-height: 1;
+
+  font-weight: 900;
+
+  letter-spacing: 8px;
+
+  color: white;
+
+  text-shadow:
+    0 0 15px rgba(100, 150, 255, 0.9),
+    0 0 35px rgba(100, 150, 255, 0.6),
+    0 0 70px rgba(100, 150, 255, 0.3);
+}
+
+.start-subtitle {
+  margin-top: 20px;
+
+  font-size: 15px;
+  font-weight: 800;
+
+  letter-spacing: 4px;
+
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.start-description {
+  max-width: 560px;
+
+  margin: 18px auto 0;
+
+  font-size: 14px;
+
+  line-height: 1.8;
+
+  color: rgba(255, 255, 255, 0.75);
+}
+
+/* ==================================================
+   START BUTTON
+================================================== */
+
+.start-button {
+  margin-top: 35px;
+
+  min-width: 190px;
+
+  padding: 16px 40px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 12px;
+
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  border-radius: 999px;
+
+  background: rgba(0, 0, 0, 0.35);
+
+  color: white;
+
+  font-size: 15px;
+  font-weight: 900;
+
+  letter-spacing: 4px;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 0 20px rgba(100, 150, 255, 0.4),
+    inset 0 0 20px rgba(255, 255, 255, 0.05);
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.start-button:hover {
+  transform: scale(1.06);
+
+  background: rgba(255, 255, 255, 0.15);
+
+  box-shadow:
+    0 0 30px rgba(100, 150, 255, 0.8),
+    0 0 70px rgba(100, 150, 255, 0.3);
+}
+
+.start-button:active {
+  transform: scale(0.97);
+}
+
+/* ==================================================
+   INSTRUCTIONS
+================================================== */
+
+.start-instructions {
+  margin-top: 40px;
+
+  display: flex;
+  justify-content: center;
+
+  gap: 55px;
+}
+
+.start-instructions div {
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  gap: 8px;
+}
+
+.start-instructions strong {
+  font-size: 24px;
+
+  filter:
+    drop-shadow(
+      0 0 8px rgba(100, 150, 255, 0.7)
+    );
+}
+
+.start-instructions span {
+  font-size: 9px;
+  font-weight: 800;
+
+  letter-spacing: 2px;
+
+  color: rgba(255, 255, 255, 0.65);
+}
+
+/* ==================================================
+   FOOTER
+================================================== */
+
+.start-footer {
+  margin-top: 35px;
+
+  font-size: 9px;
+
+  font-weight: 700;
+
+  letter-spacing: 4px;
+
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* ==================================================
+   ANIMATION
+================================================== */
+
+@keyframes kai-hand-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+/* ==================================================
+   MOBILE
+================================================== */
+
+@media (max-width: 600px) {
+  .start-overlay {
+    padding: 30px 20px;
+  }
+
+  .start-overlay h1 {
+    font-size: 50px;
+    letter-spacing: 4px;
+  }
+
+  .start-subtitle {
+    font-size: 11px;
+    letter-spacing: 2px;
+  }
+
+  .start-description {
+    font-size: 13px;
+  }
+
+  .start-instructions {
+    gap: 25px;
+  }
 }
